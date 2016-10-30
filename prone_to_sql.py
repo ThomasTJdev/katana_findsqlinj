@@ -30,7 +30,7 @@ from bs4 import BeautifulSoup	# Working with website date
 
 # INFORMATION MODULE
 def init():
-	init.Author				="TTJ - ThomasTJ 2016"
+	init.Author				="ThomasTJ 2016 (TTJ)"
 	init.Version			="1.0"
 	init.Description		="Google Dork website there are prone to SQL injections."
 	init.CodeName			="mcs/gd.sql"
@@ -116,7 +116,7 @@ def main(run):
 			for d in soup.find_all('h2'):
 				for a in d.find_all('a', href=True):
 					if string in a['href']:
-						if verboseactive == "1":
+						if verboseactive in ('1', '2', '3'):
 							print("  [+]  " + a['href'])
 						with open(rawdata, 'a') as file:
 							file.write(a['href'] + "\n")
@@ -143,7 +143,7 @@ def main(run):
 			for d in soup.find_all('cite'):
 				url = d.text
 				if string in url:
-					if verboseactive == "1":
+					if verboseactive in ('1', '2', '3'):	
 						print("  [+]  " + url)
 					with open(rawdata, 'a') as file:
 						file.write(url + "\n")
@@ -220,7 +220,7 @@ def main(run):
 				# Get data
 				line = line.rstrip('\n')
 				url = line + "'"
-				if verboseactive == "1":
+				if verboseactive in ('1', '2', '3'):	
 					print("  [*]  " + line.strip('\n'))
 				r = requests.get(url, verify=False, timeout=4)
 				soup = BeautifulSoup(r.text, 'lxml')
@@ -290,12 +290,12 @@ def main(run):
 				
 				# If X is vuln
 				if (checkMY1 > 0 or checkMY2 > 0 or checkMY3 > 0 or checkMY4 > 0 or checkMS1 > 0 or checkMS2 > 0 or checkMS3 > 0 or checkOR1 > 0 or checkOR2 > 0 or checkOR3 > 0 or checkPO1 > 0 or checkPO2):
-					if verboseactive == "1":
+					if verboseactive in ('1', '2', '3'):	
 						print("  [+]  " + line)
 					with open(filename, 'a') as file:
 						file.write(line+"\n")
 				else:
-					if verboseactive == "1":
+					if verboseactive in ('1', '2', '3'):	
 						print("  [-]  " + line)
 			
 			# Skip X or/and exit
@@ -310,7 +310,7 @@ def main(run):
 					
 			# Bad X
 			except:
-				if verboseactive == "1":
+				if verboseactive in ('1', '2', '3'):	
 					print("  [X]  Timeout or error in URL")
 			
 			   
