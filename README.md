@@ -42,7 +42,7 @@ KantanaFramework/modules/mcs/prone_to_sql.py
 License
 -------
 
-MIT, 2016 TTJ
+MIT, 2016 Thomas TJ (TTJ)
 
 Other
 -----

