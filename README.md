@@ -1,9 +1,9 @@
-mcs/gd.sql module for KantanaFramework
+mcs/gd.sql module for Katana
 ========================================
 
 Module for finding website vuln for SQL injections
 
-KantanaFramework/modules/mcs/prone_to_sql.py
+Katana/modules/mcs/prone_to_sql.py
 
  This python script is developed to show, how many vulnerables websites,
  which are laying around on the web. The main focus of the script is to
@@ -15,7 +15,7 @@ KantanaFramework/modules/mcs/prone_to_sql.py
 * python2 (developed for python3 - python3 is still included but comment out)
 * BeautifulSoup from bs4
 * (optional) sqlmap
-* [KantanaFramework](https://github.com/PowerScript/KatanaFramework)
+* [Katana](https://github.com/PowerScript/Katana)
 
 ## The script
  The script is divided into 3 main sections.
@@ -47,4 +47,4 @@ MIT, 2016 Thomas TJ (TTJ)
 Other
 -----
 
-Want to try it without KantanaFramework? Test it with python3 here [findsqlinj](https://gitlab.com/ThomasTJ/find_sql_injection)
+Want to try it without Katana? Test it with python3 here [findsqlinj](https://gitlab.com/ThomasTJ/find_sql_injection)
